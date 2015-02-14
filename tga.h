@@ -42,8 +42,10 @@ namespace TGA {
         void setPixel(u_int16_t x, u_int16_t y, Color24);
         void saveFile(string);
 
-        TGA_Image();
+        virtual ~TGA_Image();
+
     protected:
+        TGA_Image();
 
     private:
         u_int16_t width;

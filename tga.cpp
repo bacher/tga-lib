@@ -11,6 +11,10 @@ namespace TGA {
 
     }
 
+    TGA_Image::~TGA_Image() {
+        delete data;
+    }
+
     void TGA_Image::saveFile(string fileName) {
 
         TGA_Header header;
@@ -70,11 +74,13 @@ namespace TGA {
         fread(&header, sizeof(TGA_Header), 1, tga_file);
 
         if (header.image_type != 2) {
-            throw "Allow only image-type 2.";
+            cerr << "Allow only image-type 2." << endl;
+            throw;
         }
 
-        if (header.image_spec.color_depth != 24) {
-            throw "Allow only 24bit color.";
+        if (header.image_spec.color_depth != 4) {
+            cerr << "Allow only 24bit color." << endl;
+            throw;
         }
 
         tga_image->width = header.image_spec.width;
