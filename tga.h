@@ -1,4 +1,5 @@
 #include <i386/types.h>
+#include <Python/Python.h>
 
 using namespace std;
 
@@ -34,20 +35,24 @@ namespace TGA {
 
     class TGA_Image {
     public:
-        TGA_Image();
-
         static TGA_Image* newImage(u_int16_t width, u_int16_t height);
+        static TGA_Image* openImage(string path);
+        static void printInfo(string path);
 
         void setPixel(u_int16_t x, u_int16_t y, Color24);
-
         void saveFile(string);
+
+        TGA_Image();
+    protected:
 
     private:
         u_int16_t width;
         u_int16_t height;
+        u_int8_t depth;
 
         u_int8_t* data = nullptr;
         u_int32_t data_length;
+
     };
 
 }
