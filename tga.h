@@ -40,7 +40,7 @@ namespace TGA {
         static void printInfo(string path);
 
         void setPixel(u_int16_t x, u_int16_t y, Color24);
-        void saveFile(string);
+        void saveFile(string, bool = false);
 
         virtual ~TGA_Image();
 
@@ -54,7 +54,6 @@ namespace TGA {
 
         u_int8_t* data = nullptr;
         u_int32_t data_length;
-
     };
 
 }

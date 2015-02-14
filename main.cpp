@@ -19,7 +19,7 @@ int main() {
 
     auto opened = TGA_Image::openImage("24.tga");
 
-    opened->saveFile("out2.tga");
+    opened->saveFile("out2.tga", true);
 
     delete opened;
 

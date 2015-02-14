@@ -7,12 +7,15 @@ using namespace std;
 
 namespace TGA {
 
-    void compress(u_int8_t* data, u_int16_t data_length) {
+    void compress(u_int8_t* data, u_int32_t data_length, FILE* save_file) {
 
 //        u_int8_t dt[8]{2, 2, 3, 2,  2, 2, 4, 2};
 //
 //        data = dt;
 //        size = 8;
+
+        u_int8_t buffer[data_length * 2];
+        unsigned int b_index = 0;
 
         int size = data_length;
 
@@ -25,9 +28,14 @@ namespace TGA {
                 cnt++;
 
                 if (diff > 1) {
-                    cout << '(' << (diff - 1) << ") ";
+                    cout << '(' << diff << ") ";
+                    buffer[b_index++] = (u_int8_t)(diff - 2);
+
                     for (int j = i - (diff * 3); j < i - 3; j += 3) {
-                        cout << (int)data[j] << ' ';
+                        //cout << (int)data[j] << ' ';
+                        buffer[b_index++] = data[j];
+                        buffer[b_index++] = data[j + 1];
+                        buffer[b_index++] = data[j + 2];
                     }
 
                     diff = 1;
@@ -35,6 +43,17 @@ namespace TGA {
             } else {
                 if (cnt > 1) {
                     cout << cnt << '*' << (int)data[i - 3] << ' ';
+
+                    int max = 128;
+
+                    while (cnt > 0) {
+                        buffer[b_index++] = 127 + (cnt > max ? max : cnt);
+                        buffer[b_index++] = data[i - 3];
+                        buffer[b_index++] = data[i - 2];
+                        buffer[b_index++] = data[i - 1];
+
+                        cnt -= max;
+                    }
                     cnt = 1;
                     diff = 1;
 
@@ -43,8 +62,13 @@ namespace TGA {
                     if (i == size) {
 
                         cout << '(' << diff << ") ";
+                        buffer[b_index++] = diff;
+
                         for (int j = i - (diff * 3); j < i; j += 3) {
                             cout << (int)data[j] << ' ';
+                            buffer[b_index++] = data[j];
+                            buffer[b_index++] = data[j + 1];
+                            buffer[b_index++] = data[j + 2];
                         }
                     } else {
                         diff++;
@@ -53,6 +77,8 @@ namespace TGA {
             }
 
         }
+
+        fwrite(buffer, b_index, 1, save_file);
     };
 
     TGA_Image::TGA_Image() {
@@ -63,12 +89,12 @@ namespace TGA {
         delete data;
     }
 
-    void TGA_Image::saveFile(string fileName) {
+    void TGA_Image::saveFile(string fileName, bool rle) {
 
         TGA_Header header;
         memset(&header, 0, sizeof(header));
 
-        header.image_type = 2;
+        header.image_type = (u_int8_t)(rle ? 10 : 2);
         header.image_spec.width = width;
         header.image_spec.height = height;
         header.image_spec.color_depth = depth;
@@ -81,8 +107,15 @@ namespace TGA {
         FILE* save_file = fopen(fileName.c_str(), "w");
 
         fwrite(&header, sizeof(header), 1, save_file);
-        fwrite(data, data_length, 1, save_file);
-        fwrite(&footer, sizeof(footer), 1, save_file);
+
+
+        if (rle) {
+            compress(data, data_length, save_file);
+        } else {
+            fwrite(data, data_length, 1, save_file);
+        }
+
+        fwrite(&footer, sizeof(TGA_Footer), 1, save_file);
 
         fclose(save_file);
 
@@ -139,9 +172,6 @@ namespace TGA {
         tga_image->data = new u_int8_t[tga_image->data_length];
 
         fread(tga_image->data, tga_image->data_length, 1, tga_file);
-
-        compress(tga_image->data, tga_image->data_length);
-
 
         TGA_Footer footer;
 
