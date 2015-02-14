@@ -23,5 +23,7 @@ int main() {
 
     delete opened;
 
+    //TGA_Image::printInfo("24_rle.tga");
+
     return 0;
 }

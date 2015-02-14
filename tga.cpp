@@ -7,6 +7,54 @@ using namespace std;
 
 namespace TGA {
 
+    void compress(u_int8_t* data, u_int16_t size) {
+
+//        u_int8_t dt[8]{2, 2, 3, 2,  2, 2, 4, 2};
+//
+//        data = dt;
+//        size = 8;
+
+        int cnt = 1;
+        int diff = 1;
+        u_int8_t prev = data[0];
+
+        for (int i = 1; i <= size; ++i) {
+
+            u_int8_t current = data[i];
+
+            if (i != size && current == prev) {
+                cnt++;
+
+                if (diff > 1) {
+                    for (int j = i - diff; j < i - 1; ++j) {
+                        cout << (int)data[j] << ' ';
+                    }
+
+                    diff = 1;
+                }
+            } else {
+                if (cnt > 1) {
+                    cout << cnt << '*' << (int)prev << ' ';
+                    cnt = 1;
+                    diff = 1;
+
+                } else {
+
+                    if (i == size) {
+                        for (int j = i - diff; j < i; ++j) {
+                            cout << (int)data[j] << ' ';
+                        }
+                    } else {
+                        diff++;
+                    }
+                }
+            }
+
+            prev = current;
+
+        }
+    };
+
     TGA_Image::TGA_Image() {
 
     }
@@ -78,7 +126,7 @@ namespace TGA {
             throw;
         }
 
-        if (header.image_spec.color_depth != 4) {
+        if (header.image_spec.color_depth != 24) {
             cerr << "Allow only 24bit color." << endl;
             throw;
         }
@@ -91,6 +139,9 @@ namespace TGA {
         tga_image->data = new u_int8_t[tga_image->data_length];
 
         fread(tga_image->data, tga_image->data_length, 1, tga_file);
+
+        compress(tga_image->data, tga_image->data_length);
+
 
         TGA_Footer footer;
 
