@@ -11,8 +11,19 @@ namespace TGA {
 
     }
 
+    TGA_Image::TGA_Image(u_int16_t width, u_int16_t height, Color24 bg)
+            :width(width), height(height) {
+
+        data_length = (unsigned)(width * height * 3);
+        data = new u_int8_t[data_length];
+
+        for (int i = 0; i < width * height; ++i) {
+            memcpy(data + i, &bg, 3);
+        }
+    }
+
     TGA_Image::~TGA_Image() {
-        delete data;
+        delete[] data;
     }
 
     TGA_Image* TGA_Image::openImage(string path) {
@@ -37,9 +48,8 @@ namespace TGA {
 
         tga_image->width = header.image_spec.width;
         tga_image->height = header.image_spec.height;
-        tga_image->depth = header.image_spec.color_depth;
 
-        tga_image->data_length = (unsigned)(tga_image->width * tga_image->height * tga_image->depth / 8);
+        tga_image->data_length = (unsigned)(tga_image->width * tga_image->height * 3);
         tga_image->data = new u_int8_t[tga_image->data_length];
 
         if (header.image_type == 2) {
@@ -65,7 +75,7 @@ namespace TGA {
         header.image_type = (u_int8_t)(rle ? 10 : 2);
         header.image_spec.width = width;
         header.image_spec.height = height;
-        header.image_spec.color_depth = depth;
+        header.image_spec.color_depth = 24;
 
         TGA_Footer footer;
         memset(&footer, 0, sizeof(footer));
@@ -91,23 +101,6 @@ namespace TGA {
     void TGA_Image::setPixel(u_int16_t x, u_int16_t y, Color24 color) {
 
         memcpy(&data[(width * y + x) * 3], &color, 3);
-
-    }
-
-    TGA_Image* TGA_Image::newImage(u_int16_t width, u_int16_t height) {
-
-        auto tga_image = new TGA_Image();
-
-        tga_image->width = width;
-        tga_image->height = height;
-        tga_image->depth = 24;
-
-        tga_image->data_length = (unsigned)(width * height * tga_image->depth / 3);
-        tga_image->data = new u_int8_t[tga_image->data_length];
-
-        memset(tga_image->data, 0, tga_image->data_length);
-
-        return tga_image;
 
     }
 

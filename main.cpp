@@ -6,7 +6,7 @@ using namespace TGA;
 
 int main() {
 
-    auto image = TGA_Image::newImage(10, 5);
+    auto image = new TGA_Image(10, 5);
 
     image->setPixel(0, 0, Color24{0xFF, 0, 0});
     image->setPixel(9, 0, Color24{0, 0xFF, 0});
