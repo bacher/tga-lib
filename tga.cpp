@@ -7,6 +7,8 @@ using namespace std;
 
 namespace TGA {
 
+    typedef unsigned int uint;
+
     TGA_Image::TGA_Image() {
 
     }
@@ -115,7 +117,7 @@ namespace TGA {
 
             fread(&rle_var, 1, 1, file);
 
-            if (rle_var >= 127) {
+            if (rle_var > 127) {
                 int repeat_count = rle_var - 127;
 
                 fread(&color, depth_bytes, 1, file);
@@ -143,32 +145,50 @@ namespace TGA {
 
     }
 
+    void fill_diff(u_int8_t* buffer, uint* b_index, u_int8_t* data, int d_index, uint diff, u_int8_t depth_bytes) {
+
+        uint max = 128;
+        uint remain = diff;
+
+        while (remain) {
+
+            uint pass = (remain > max ? max : remain);
+
+            buffer[(*b_index)++] = (u_int8_t)(pass - 1);
+
+            for (
+                    int i = 0, offset = d_index - (remain * depth_bytes);
+                    i < pass;
+                    i++, offset += depth_bytes
+            ) {
+                memcpy(buffer + (*b_index), data + offset, depth_bytes);
+
+                *b_index += depth_bytes;
+            }
+
+            remain -= pass;
+
+        }
+
+    }
+
     void TGA_Image::compress_data(FILE* save_file) {
 
         u_int8_t buffer[data_length * 2];
-        unsigned int b_index = 0;
-
-        int size = data_length;
+        uint b_index = 0;
+        u_int8_t depth_bytes = 3;
 
         int cnt = 1;
         int diff = 1;
 
-        for (int i = 3; i <= size; i += 3) {
+        for (int i = depth_bytes; i <= data_length; i += depth_bytes) { // [1;length]
 
-            if (i != size && data[i] == data[i - 3] && data[i + 1] == data[i - 2] && data[i + 2] == data[i - 1]) {
+            if (i != data_length && memcmp(data + i, data + i - depth_bytes, depth_bytes) == 0) {
                 cnt++;
 
                 if (diff > 1) {
-                    // FIXME: diff must be less than 128
 
-                    // RLE diff 0 = count 1, because -2.
-                    buffer[b_index++] = diff - 2;
-
-                    for (int j = i - (diff * 3); j < i - 3; j += 3) {
-                        buffer[b_index++] = data[j];
-                        buffer[b_index++] = data[j + 1];
-                        buffer[b_index++] = data[j + 2];
-                    }
+                    fill_diff(buffer, &b_index, data, i - depth_bytes, (uint)(diff - 1), depth_bytes);
 
                     diff = 1;
                 }
@@ -178,10 +198,11 @@ namespace TGA {
                     int max = 128;
 
                     while (cnt > 0) {
-                        buffer[b_index++] = 127 + (cnt > max ? max : cnt);
-                        buffer[b_index++] = data[i - 3];
-                        buffer[b_index++] = data[i - 2];
-                        buffer[b_index++] = data[i - 1];
+                        buffer[b_index++] = (u_int8_t)(127 + (cnt > max ? max : cnt));
+
+                        memcpy(buffer + b_index, data + i - depth_bytes, depth_bytes);
+
+                        b_index += depth_bytes;
 
                         cnt -= max;
 
@@ -191,15 +212,10 @@ namespace TGA {
 
                 } else {
 
-                    if (i == size) {
+                    if (i == data_length) {
 
-                        buffer[b_index++] = diff - 1;
+                        fill_diff(buffer, &b_index, data, i, (uint)diff, depth_bytes);
 
-                        for (int j = i - (diff * 3); j < i; j += 3) {
-                            buffer[b_index++] = data[j];
-                            buffer[b_index++] = data[j + 1];
-                            buffer[b_index++] = data[j + 2];
-                        }
                     } else {
                         diff++;
                     }
@@ -240,4 +256,5 @@ namespace TGA {
 
         //cout << "Footer sign: " << (string(footer.tga_sign) == "TRUEVISION-XFILE." ? "TRUE" : "FALSE") << endl;
     }
+
 }

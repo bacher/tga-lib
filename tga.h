@@ -38,7 +38,7 @@ namespace TGA {
 
     class TGA_Image {
     public:
-        TGA_Image(u_int16_t width, u_int16_t height, Color24 bg = Color24{0,0,0});
+        TGA_Image(u_int16_t width, u_int16_t height, Color24 bg = Color24{0xFF, 0xFF, 0xFF});
         virtual ~TGA_Image();
 
         static TGA_Image* openImage(string path);
