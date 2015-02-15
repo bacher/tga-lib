@@ -121,7 +121,7 @@ namespace TGA {
                 fread(&color, depth_bytes, 1, file);
 
                 while (repeat_count--) {
-                    memcpy(&data[d_index], &color, sizeof(Color24));
+                    memcpy(data + d_index, &color, depth_bytes);
 
                     d_index += depth_bytes;
                 }
@@ -130,7 +130,7 @@ namespace TGA {
 
                 u_int32_t series_count = rle_var + 1;
 
-                fread(&data[d_index], series_count * depth_bytes, 1, file);
+                fread(data + d_index, series_count * depth_bytes, 1, file);
 
                 d_index += series_count * depth_bytes;
             }
