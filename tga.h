@@ -51,6 +51,9 @@ namespace TGA {
     protected:
         TGA_Image();
 
+        void compress_data(FILE* save_file);
+        void decompress_data(FILE* save_file);
+
     private:
         u_int16_t width;
         u_int16_t height;

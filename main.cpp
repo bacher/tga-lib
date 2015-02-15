@@ -17,9 +17,9 @@ int main() {
     delete image;
 
 
-    auto opened = TGA_Image::openImage("24.tga");
+    auto opened = TGA_Image::openImage("24_rle.tga");
 
-    opened->saveFile("out2.tga", true);
+    opened->saveFile("out3.tga", true);
 
     delete opened;
 
