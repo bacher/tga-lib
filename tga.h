@@ -5,6 +5,8 @@ using namespace std;
 
 namespace TGA {
 
+    #pragma pack(push, 1)
+
     union Color24 {
         u_int8_t rgb[3];
         u_int32_t color;
@@ -32,6 +34,8 @@ namespace TGA {
         u_int64_t developer_offset:40;
         char tga_sign[18];
     };
+
+    #pragma pack(pop)
 
     class TGA_Image {
     public:

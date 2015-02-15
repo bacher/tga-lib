@@ -28,7 +28,8 @@ namespace TGA {
                 cnt++;
 
                 if (diff > 1) {
-                    cout << '(' << diff << ") ";
+                    //cout << '(' << diff << ") ";
+                    // RLE diff 0 = count 1, because - 2.
                     buffer[b_index++] = (u_int8_t)(diff - 2);
 
                     for (int j = i - (diff * 3); j < i - 3; j += 3) {
@@ -42,7 +43,7 @@ namespace TGA {
                 }
             } else {
                 if (cnt > 1) {
-                    cout << cnt << '*' << (int)data[i - 3] << ' ';
+                    //cout << cnt << '*' << (int)data[i - 3] << ' ';
 
                     int max = 128;
 
@@ -61,11 +62,11 @@ namespace TGA {
 
                     if (i == size) {
 
-                        cout << '(' << diff << ") ";
+                        //cout << '(' << diff << ") ";
                         buffer[b_index++] = diff;
 
                         for (int j = i - (diff * 3); j < i; j += 3) {
-                            cout << (int)data[j] << ' ';
+                            //cout << (int)data[j] << ' ';
                             buffer[b_index++] = data[j];
                             buffer[b_index++] = data[j + 1];
                             buffer[b_index++] = data[j + 2];
@@ -107,7 +108,6 @@ namespace TGA {
         FILE* save_file = fopen(fileName.c_str(), "w");
 
         fwrite(&header, sizeof(header), 1, save_file);
-
 
         if (rle) {
             compress(data, data_length, save_file);
